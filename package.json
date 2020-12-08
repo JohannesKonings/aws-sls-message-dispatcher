@@ -1,0 +1,15 @@
+{
+  "name": "aws-serverless-message-dispatcher-template",
+  "version": "1.0.0",
+  "description": "`serverless create --template aws-nodejs`",
+  "main": "dispatcher.js",
+  "dependencies": {
+    "serverless-export-env": "^1.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

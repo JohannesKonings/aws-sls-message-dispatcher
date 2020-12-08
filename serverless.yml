@@ -1,0 +1,80 @@
+service: aws-sls-message-dispatcher
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-export-env
+
+useDotenv: true
+
+custom:
+  dispatchTopic1: "${self:service}-${self:provider.stage}-dispatchTopic1"
+  dispatchTopic1Arn:
+    dev:
+      { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.dispatchTopic1}" ] ]  }
+    prod:
+     { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.dispatchTopic1}" ] ]  }
+  dispatchTopic2: "${self:service}-${self:provider.stage}-dispatchTopic2"
+  dispatchTopic2Arn:
+    dev:
+      { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.dispatchTopic2}" ] ]  }
+    prod:
+     { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.dispatchTopic2}" ] ]  }
+
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage,'dev'}
+  region: ${opt:region, 'us-east-1'} 
+  apiGateway:
+    shouldStartNameWithService: true
+  apiKeys:
+    - ${self:service}-${self:provider.stage}-apiKey
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "*"
+      Resource: "*"
+
+functions:
+  dispatcher:
+    handler: dispatcher.dispatch
+    events:
+      - http:
+          path: event-receiver
+          method: post
+          cors: true
+          private: true
+    environment:
+      region: ${self:provider.region}
+      dispatchTopic1: ${self:custom.dispatchTopic1Arn.${self:provider.stage}}
+      dispatchTopic2: ${self:custom.dispatchTopic2Arn.${self:provider.stage}}
+
+resources:
+  Resources:
+    dispatchTopic1:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.dispatchTopic1}
+    dispatchTopic2:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.dispatchTopic2}
+    snsPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: SnsTopicPolicy
+              Effect: Allow
+              Principal: "*"
+              Action:
+                - sns:Publish
+              Resource: "*"
+        Topics:
+          - Ref: dispatchTopic1
+          - Ref: dispatchTopic2
+    
+    
