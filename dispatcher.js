@@ -8,9 +8,20 @@ module.exports.dispatch = async event => {
 
   let sns = new AWS.SNS(snsOpts);
 
+  const topicArnFromEnv = () => {
+    switch (event.headers.type) {
+      case "topic1":
+        return process.env.dispatchTopic1;
+      case "topic2":
+        return process.env.dispatchTopic1;
+      default:
+        console.log("no valid event type:", event.headers.type);
+    }
+  };
+
   let messageData = {
     Message: event.body,
-    TopicArn: process.env.dispatchTopic1,
+    TopicArn: topicArnFromEnv,
   };
 
   function json(statusCode, data, headers = {}) {
