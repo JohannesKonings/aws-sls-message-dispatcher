@@ -1,4 +1,4 @@
-service: test-consumer
+service: test-consumer-s3
 
 frameworkVersion: '2'
 
@@ -22,6 +22,9 @@ functions:
             Fn::GetAtt:
               - topic1Processor
               - Arn
+    environment:
+      region: ${self:provider.region}
+      bucket: !Ref s3EventFiles
 
 resources:
   Resources:
@@ -58,3 +61,19 @@ resources:
         Queues:
           - Ref: topic1Processor
           - Ref: topic1SubscriptionDlq
+    s3EventFiles:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${env:dispatchTopic1BucketName}"
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+          - AllowedMethods:
+            - GET
+            - PUT
+            - POST
+            - HEAD
+            AllowedOrigins:
+            - "*"
+            AllowedHeaders:
+            - "*"

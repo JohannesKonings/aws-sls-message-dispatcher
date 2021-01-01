@@ -1,0 +1,4 @@
+region=us-east-1
+dispatchTopic1=arn:aws:sns:us-east-1:964817886626:aws-sls-message-dispatcher-dev-dispatchTopic1
+dispatchTopic2=arn:aws:sns:us-east-1:964817886626:aws-sls-message-dispatcher-dev-dispatchTopic2
+dispatchTopic1BucketName=dispatch-topic1-event-files
