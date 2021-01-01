@@ -1,5 +1,9 @@
 # aws-sls-message-dispatcher
 
+# architecture
+
+![architecture diagram](./architecture/aws-sls-message-dispatcher.png "architecture diagram")
+
 # serverless framework
 
 `serverless create --template aws-nodejs`
