@@ -1,0 +1,81 @@
+service: test-consumer-dynamodb
+
+frameworkVersion: '2'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "*"
+      Resource: "*"
+  
+functions:
+  processTopic2:
+    handler: processor.processTopic2
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - topic2Processor
+              - Arn
+    environment:
+      region: ${self:provider.region}
+      bucket: !Ref dynamoDbEventData
+
+resources:
+  Resources:
+    topic2Processor:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: topic2Processor
+    topic2Subscription:
+        Type: "AWS::SNS::Subscription"
+        Properties:
+          TopicArn: "${env:dispatchTopic2}"
+          Protocol: sqs
+          Endpoint:
+            Fn::GetAtt: [topic2Processor, Arn]
+          RedrivePolicy:
+            deadLetterTargetArn: !GetAtt
+              - topic2SubscriptionDlq
+              - Arn
+    topic2SubscriptionDlq:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: topic2Processor-Dlq
+    SqsPolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: "allow-sns-messages"
+              Effect: Allow
+              Principal: "*"
+              Resource: "*"
+              Action: "SQS:SendMessage"
+        Queues:
+          - Ref: topic2Processor
+          - Ref: topic2SubscriptionDlq
+    dynamoDbEventData:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "id"
+            AttributeType: "S"   
+        KeySchema:
+          -
+            AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: "NEW_AND_OLD_IMAGES"
+        TableName: "dynamoDbEventData"
