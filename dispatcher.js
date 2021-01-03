@@ -14,7 +14,7 @@ module.exports.dispatch = async event => {
     case "topic1":
       topicArnFromEnv = process.env.dispatchTopic1;
     case "topic2":
-      topicArnFromEnv = process.env.dispatchTopic1;
+      topicArnFromEnv = process.env.dispatchTopic2;
     default:
       console.log("no valid event type:", event.headers.type);
   }
