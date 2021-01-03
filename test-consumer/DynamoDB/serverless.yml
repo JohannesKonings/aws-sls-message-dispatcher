@@ -24,7 +24,7 @@ functions:
               - Arn
     environment:
       region: ${self:provider.region}
-      bucket: !Ref dynamoDbEventData
+      tableName: !Ref dynamoDbEventData2
 
 resources:
   Resources:
@@ -61,21 +61,21 @@ resources:
         Queues:
           - Ref: topic2Processor
           - Ref: topic2SubscriptionDlq
-    dynamoDbEventData:
+    dynamoDbEventData2:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: "id"
-            AttributeType: "S"   
+          - AttributeName: "pk"
+            AttributeType: "S"
+          - AttributeName: "sk"
+            AttributeType: "S"
         KeySchema:
-          -
-            AttributeName: "id"
+          - AttributeName: "pk"
             KeyType: "HASH"
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          - AttributeName: "sk"
+            KeyType: "RANGE"
+        BillingMode: PAY_PER_REQUEST
         StreamSpecification:
           StreamViewType: "NEW_AND_OLD_IMAGES"
-        TableName: "dynamoDbEventData"
+        TableName: "dynamoDbEventData2"
