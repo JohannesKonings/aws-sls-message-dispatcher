@@ -4,6 +4,10 @@
 
 ![architecture diagram](./architecture/aws-sls-message-dispatcher.png "architecture diagram")
 
+# Grafana dashboard
+
+[sls dispatcher and consumer](https://grafana.com/grafana/dashboards/13671/edit)
+
 # serverless framework
 
 `serverless create --template aws-nodejs`
